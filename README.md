@@ -33,7 +33,7 @@ I know of that presents an almost leakfree abstraction of the underlying compute
 That means that, unless I use platform-specific modules or extensions, my program developed on Linux
 will just work under Windows, and vice-versa.
 
-Because of my enthousiasm for Python, and becasue I continue to gain new insights in how
+Because of my enthousiasm for Python, and because I continue to gain new insights in how
 Python works, I decided to write down what I found in this blog,
 in the hope that other people find it useful.
 Have fun!
