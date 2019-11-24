@@ -15,10 +15,11 @@ and override the `__new__()` method to check that the
 value of the instance is in the allowed range.
 But then I thought about the internals
 of what happens when you
-create e.g. an instance with the value 5.
+create e.g. an integer instance with the value 5.
 And I realised that value of the object (5 in this case)
 can only be determined by comparing
-it for equality with a Python integer with the value 5.
+it for equality with another Python integer
+that has the value 5.
 The actual "fiveness" of the object
 (the bit pattern that defines the value)
 is hidden by the language.
@@ -32,7 +33,7 @@ And there is no way from within the Python language
 to pierce through this wrapper,
 and access the underlying data structures in
 the computer's memory.
-Of course, there are modules that allow you to
+There are, of course, modules that allow you to
 manipulate the underlying hardware. The `ctypes`
 module provides just such an interface.
 But notice that `ctypes` and similar modules are
@@ -59,17 +60,8 @@ That means that other versions of Python
 (in particular the Python 2.x versions)
 may have slightly different behaviors.
 
-While working on this post, I constantly encountered things
-that I wanted to include.
-As a consequence, the original blog post was becoming
-way too big, at least for my taste.
-I therefore decided to split this in three separate
-blog posts, to keep the size of the individual
-articles manageable.
-
-## Objects
-
-The language reference contains a chapter on the [data model](https://docs.python.org/3/reference/datamodel.html)
+The language reference contains a chapter
+on the [data model](https://docs.python.org/3/reference/datamodel.html)
 that describes objects:
 
 > Objects are Python’s abstraction for data.
@@ -102,17 +94,28 @@ it can refer to labels that other people or institutions
 assign to us (I have a name, I have a social security number),
 to name just a few of the possibilities.
 
-### Identity
+While working on this post, I constantly encountered things
+that I wanted to include.
+As a consequence, the original blog post was becoming
+way too big, at least for my taste.
+I therefore decided to split this in three separate
+blog posts, to keep the size of the individual
+articles manageable.
+This post deals mainly with an object's identity.
+Other posts will deal with an object's type,
+and an object's value.
 
-As mentioned before, the subject of this post is the
-object's identity.
+## Object Identity
+
 The identity of an object is like a social security number:
-it is a bookkeeping device used by the Python runtime
-to uniquely identify each object that exists.
+it is assigned and managed by the Python runtime,
+and it is essentially a bookkeeping device
+used by the runtime
+to identify and keep track of each object that exists.
 
 The identity of an object is time-wise unique.
 It is set when the object is created, and it never changes during the object’s lifetime.
-That means that at any given moment in time,
+That means that at any specific moment in time,
 there can never be two different Python objects with the same identity.
 But the object’s identity can be re-used after the object is garbage-collected,
 hence time-wise unique.
@@ -122,14 +125,17 @@ And at some later time, each and any of those names may refer to any other objec
 The identity of an object remains the same though,
 and is unique for that object during the object’s lifetime.
 
-It is important to realize that the object’s identity
+Because the identity of an object is essentially
+a bookkeeping device for the Python runtime,
+the object’s identity simply
 cannot be used or manipulated from within a Python program.
 In other words, the identity of an object is itself *not* a Python object –
-there is simply no way in Python-the-language to get hold of the identity of an object.
+there is just no way in Python-the-language to get hold of the identity of an object.
 The closest you can get is an integer object that represents the identity,
 as returned by the built-in function `id()`.
 But note that this integer object is not the identity itself, only a representation of it.
-In other words, you cannot take this integer value and use it to reach the object.
+In other words, you cannot take this integer value
+and use it to reach back to the object.
 
 Most built-in functions work by calling a special method on the object the operate upon.
 E.g. `len(x)` is equivalent to `x.__len__()`.
@@ -140,7 +146,12 @@ The object `x` itself has
 no influence over the result of this function call.
 In fact, an object does not even know its identity, only the Python runtime knows it.
 
-The usefulness of the built-in function `id()` is therefore limited.
+The usefulness of the built-in function `id()`
+is therefore limited.
+The function `id()` gives a representation of the
+identity of the object,
+*at the time that the function was called*.
+
 As stated earlier, the identity of an object can be reused after the object has been destroyed.
 This can happen even within one Python statement:
 
