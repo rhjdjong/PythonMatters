@@ -4,6 +4,10 @@ date: 2019-11-20
 excerpt: "Exploring the Python object model: Object identity"
 ---
 
+[PLR]: https://docs.python.org/3/reference/index.html
+[Part2]: {% post_url 2019-11-20-Everything-is-an-object-part-2-types %}
+[Part3]: {% post_url 2019-11-20-Everything-is-an-object-part-3-value %}
+
 ## Introduction
 
 The other day I needed to write
@@ -27,9 +31,10 @@ is hidden by the language.
 Another way to phrase this is
 that Python does not allow direct access
 to the underlying hardware.
-Whenever you try to do so, Python wraps the result
+You can try to do so, but the Python runtime
+always wraps the result
 in a Python object.
-And there is no way from within the Python language
+There is just no way from within the Python language
 to pierce through this wrapper,
 and access the underlying data structures in
 the computer's memory.
@@ -37,7 +42,7 @@ There are, of course, modules that allow you to
 manipulate the underlying hardware. The `ctypes`
 module provides just such an interface.
 But notice that `ctypes` and similar modules are
-extension modules, not part of the language itself.
+extension modules, not part of the Python language itself.
 And even with these modules, you are still presented
 with Python objects that represent the
 underlying structure.
@@ -53,7 +58,6 @@ and find it is
 [objects all the way](https://en.wikipedia.org/wiki/Turtles_all_the_way_down),
 both up and down.
 
-[PLR]: https://docs.python.org/3/reference/index.html
 The main source for this article is
 the [Python Language Reference for Python 3][PLR].
 That means that other versions of Python
@@ -69,7 +73,7 @@ All data in a Python program is represented by objects or by relations between o
 (In a sense, and in conformance to Von Neumann’s model of a “stored program computer,”
 code is also represented by objects.)
 
-That an object can represent data is fairly obvious:
+That an object can represent data is obvious:
 an integer objects represents an integer number,
 a string object represents a Unicode string,
 and a code object represents executable code.
@@ -102,8 +106,8 @@ I therefore decided to split this in three separate
 blog posts, to keep the size of the individual
 articles manageable.
 This post deals mainly with an object's identity.
-Other posts will deal with an object's type,
-and an object's value.
+Other posts will deal with an object's [type][Part2],
+and an object's [value][Part3].
 
 ## Object Identity
 
@@ -120,7 +124,7 @@ there can never be two different Python objects with the same identity.
 But the object’s identity can be re-used after the object is garbage-collected,
 hence time-wise unique.
 Note that the object’s identity is _not_ the object’s name.
-There can be multiple names that refer to the same object – or no name at all. 
+There can be multiple names that refer to the same object &mdash; or no name at all. 
 And at some later time, each and any of those names may refer to any other object.
 The identity of an object remains the same though,
 and is unique for that object during the object’s lifetime.
@@ -148,11 +152,15 @@ In fact, an object does not even know its identity, only the Python runtime know
 
 The usefulness of the built-in function `id()`
 is therefore limited.
-The function `id()` gives a representation of the
-identity of the object,
-*at the time that the function was called*.
-
-As stated earlier, the identity of an object can be reused after the object has been destroyed.
+Because the function `id()` gives a representation of the
+identity of the object
+*at the time that the function was called*,
+you cannot reliably store this value and
+use it later to compare it with the result
+of another `id()` call.
+This is because,
+as I mentioned earlier,
+the identity of an object can be reused after the object has been destroyed.
 This can happen even within one Python statement:
 
 	>>> id(object()), id(object())
@@ -177,7 +185,6 @@ of the same class for both objects, the following gives similar results:
 	(1641262059472, 1641262059472)
 	>>>
 
-
 Note that this behavior is _not_ guaranteed by the language.
 Other Python implementations may keep the individual object instances alive longer,
 or elect to never re-use identities.
@@ -191,6 +198,7 @@ Again, this is handled completely by the Python runtime.
 The objects themselves have no way to influence the outcome of the `is` operator.
 
 So, to summarize:
+
 * The identity of an object is a bookkeeping device for the Python runtime.
 * The identity is not an object, and hence cannot be manipulated from within a Python program.
 * The built-in function `id()` and the operator `is`

@@ -4,10 +4,12 @@ date: 2019-11-20
 excerpt: "Exploring the Python object model: Object type"
 ---
 
+[PLR]: https://docs.python.org/3/reference/index.html
+[Part1]: {% post_url 2019-11-18-Everything-is-an-object-part-1-identity %}
+[Part3]: {% post_url 2019-11-20-Everything-is-an-object-part-3-value %}
+
 ## Introduction
 
-[PLR]: https://docs.python.org/3/reference/index.html
-[Part1]:{% post_url 2019-11-18-Everything-is-an-object-part-1-identity %}
 This is the second blog about the Python object model.
 In the [previous blog][Part1] I noted
 that the [Python Language Reference][PLR]
@@ -18,14 +20,6 @@ states that
 I also noted that this is an ambiguous statement,
 because the verb "to have" can mean so many different
 things.
-
-In the [previous post][Part1] I noticed
-that the meaning of "has" in the phrase
-"Every object has an identity"
-indicates that an external
-agency (the Python runtime) assigns an identity
-to every object, in order to identify and keep track
-of all objects.
 
 In this blog I investigate the meaning of the
 phrase "Every object has a type".
@@ -57,9 +51,11 @@ values were accepted.
 In this case, the fact that the type defines
 the possible values is straight-forward.
 But in general the concept of value
-is not so easy to grasp. The next blog
-post in this series deals exclusively
+is not so easy to grasp. The [next blog
+post][Part3] in this series deals exclusively
 with the values of objects.
+
+## Types
 
 The `type(x)` built-in function returns
 the type of object `x`.
@@ -93,11 +89,11 @@ type, but that it can easily lead to strange behaviour.
 
 And since everything in Python is an object,
 an object’s type is itself an object.
-Which means that the object's type also has a type,
+This means that the object's type also has a type,
 and the type of the object's type is also an object and has a type,
 and so on and so forth.
 
-Coming back to the phrase I quoted in the beginning,
+Coming back to the phrase I quoted in the [previous post][Part1],
 there is another way to read it: "In Python, everything is an `object`"
 (note the font change).
 
@@ -122,8 +118,11 @@ an instance of the class `object`.
 Python has two built-in functions that deal with
 object instances and subclasses:
 
-* `isinstance(x, C)` is true if the type of object `x` is (a subclass of) the class `C`.
-* `issubclass(y, C)` is true if `y` is a class that is (a subclass of) the class `C`.
+* `isinstance(x, C)` is true if 
+  `x` is an instance of the class `C`, i.e.
+  if the type of object `x` is (a subclass of) the class `C`.
+* `issubclass(y, C)` is true if
+  `y` is a class that is (a subclass of) the class `C`.
 
 This means that for every object `x` in Python,
 `isinstance(x, object)` is true.
@@ -138,11 +137,11 @@ All classes derive, directly or indirectly,
 from `object`, so `A` is a subclass of `object`.
 So we have:
 
-![issubclass(a, object)](/assets/Everything-is-an-object/object-class-inheritance.svg){: .align-center}
+![A is a subclass of object](/assets/Everything-is-an-object/object-class-inheritance.svg){: .align-center}
 
 An instance `a`  of that class is, by definition, an instance of `A`.
 
-![isinstance(a, A)](/assets/Everything-is-an-object/instance-class.svg){: .align-center}
+![a is an instance of A](/assets/Everything-is-an-object/instance-class.svg){: .align-center}
 
 And class `A` is also an object, so it is an instance of yet another class,
 and that class must again be a subclass of `object`:
@@ -155,11 +154,11 @@ and that class must again be a subclass of `object`:
     (<class 'object'>,)
     >>> 
 
-![isinstance(A, type)](/assets/Everything-is-an-object/class-metaclass.svg){: .align-center}
+![class A is an instance of type](/assets/Everything-is-an-object/class-metaclass.svg){: .align-center}
 
 Combining all the above, we get the following diagram:
 
-![a-A-type-object](/assets/Everything-is-an-object/instance-class-metaclass.svg){: .align-center}
+![instance a, class A, object, and type](/assets/Everything-is-an-object/instance-class-metaclass.svg){: .align-center}
 
 Now the class `object` of course also has a type:
 
@@ -167,7 +166,7 @@ Now the class `object` of course also has a type:
     <class 'type'>
     >>> 
 
-![object-is-a-type](/assets/Everything-is-an-object/object-metatype.svg){: .align-center}
+![object is an instance of type](/assets/Everything-is-an-object/object-metatype.svg){: .align-center}
 
 So, `type` is the class of both `A` and `object`.
 In fact, in Python the class of a class is `type` 
@@ -190,7 +189,7 @@ we can replace `A` with `type` (because `type` is a subclass
 of `object`), and we can replace `a` with `object`
 (because `object` is an instance of `type`).
 
-![object-type-full](/assets/Everything-is-an-object/object-type-metatype.svg){: .align-center}
+![object is an instance of type large picture](/assets/Everything-is-an-object/object-type-metatype.svg){: .align-center}
 
 Now the two occurrences of `object` in reality depict
 the same object but in different roles.
@@ -201,7 +200,7 @@ shown only once,
 we get the following diagram for the relationships
 between `object` and `type`:
 
-![Object-type relationships](/assets/Everything-is-an-object/object-type.svg){: .align-center}
+![object is an instance of type condensed](/assets/Everything-is-an-object/object-type.svg){: .align-center}
 
 We see that the "is instance of" relationship is circular:
 `object` is an instance of `type`
@@ -221,7 +220,7 @@ It is not possible to create such loops with user-defined classes.
 
 ### Classes and instances
 
-There are of course many way in which you can
+There are of course many ways in which you can
 partition the different kinds of objects
 that exist in Python.
 The above shows one such partition:
@@ -243,6 +242,56 @@ And similar to the way in which a class controls the
 behaviour of the objects that it generates, do
 metaclasses (`type` and its subclasses) control
 the behaviour of a class, in particular its creation.
+
+The division between classes and non-classes is
+quite noticeable.
+If you try to ask if the instance `a` (of class `A`)
+is a _subclass_ of object, you get:
+
+    >>> a = A()
+    >>> issubclass(a, object)
+    Traceback (most recent call last):
+      File "<pyshell#3>", line 1, in <module>
+        issubclass(a, object)
+    TypeError: issubclass() arg 1 must be a class
+    >>> 
+
+So the Python runtime can determine whether an object
+is a class or a non-class.
+The [language reference][PLR] is silent on this
+subject, which means that this is really an
+implementation detail.
+But at least in CPython 3.8 it is the
+presence of the `__bases__` attribute
+that decides if an object is considered a class &mdash;
+at least for the `issubclass()` function.
+
+    >>> a.__bases__ = (object,)
+    >>> issubclass(a, object)
+    True
+    >>>
+
+It is fun to play around with this, and try to fool
+the Python runtime.
+You can even pretend that you can create a class
+that is not a subclass of `object`:
+
+    >>> a.__bases__ = ()
+    >>> issubclass(a, object)
+    False
+    >>> 
+
+You could try to continue this and see
+if you can really create a class
+that is not derived from `object`.
+But at some point,
+probably sooner than later,
+you will run into
+various safeguards built in the Python runtime
+that prevent this.
+But hey, it's fun to try and see how far you can get.
+
+### Summary
 
 To summarize:
 
